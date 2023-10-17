@@ -8,64 +8,64 @@ using namespace std;
 #include "Wave.hpp"
 
 Wave::Wave() {            
-  //Vérifi que tout est correct pour la taille des types
+  //Verifi que tout est correct pour la taille des types
   checkTypesSize();
-  is_data8_allocated  = false; // Tableau non encore alloué
-  is_data16_allocated = false; // Tableau non encore alloué
+  is_data8_allocated  = false; // Tableau non encore alloue
+  is_data16_allocated = false; // Tableau non encore alloue
 }
 
-Wave::Wave(short* data16,       // Tableau de données
-           long int data_nb,    // Nombre de données
-           short channels_nb,   // Nombre de canaux (1 pour mono ou 2 pour stéréo)
-           int sampling_freq) { // Fréquence d'échantillonnage (en Hertz)(classique en musique : 44100 Hz)
+Wave::Wave(short* data16,       // Tableau de donnees
+           long int data_nb,    // Nombre de donnees
+           short channels_nb,   // Nombre de canaux (1 pour mono ou 2 pour stereo)
+           int sampling_freq) { // Frequence d'echantillonnage (en Hertz)(classique en musique : 44100 Hz)
 
   int i;
 
-  // Vérifi que tout est correct pour la taille des types
+  // Verifi que tout est correct pour la taille des types
   checkTypesSize();
 
-  // Nombre de données
+  // Nombre de donnees
   (*this).data_nb = data_nb;
-  // Tableau de donées lorsque l'on est sur des données 16 bits
+  // Tableau de donees lorsque l'on est sur des donnees 16 bits
   (*this).data16 = new short[data_nb];
   for (i=0; i<data_nb; i++) { 
     (*this).data16[i] = data16[i]; //Recopie en profondeur
   }
-  is_data8_allocated  = false; // Tableau non alloué
-  is_data16_allocated = true;  // Tableau alloué
+  is_data8_allocated  = false; // Tableau non alloue
+  is_data16_allocated = true;  // Tableau alloue
   
   InitDescriptor(16, channels_nb, sampling_freq);
 }
 
-Wave::Wave(unsigned char* data8, // Tableau de donées lorsque l'on est sur des données 8 bits
-           long int data_nb,     // Nombre de données
-           short channels_nb,    // Nombre de canaux (1 pour mono ou 2 pour stéréo)
-           int sampling_freq) {  // Fréquence d'échantillonnage (en Hertz)(classique en musique : 44100 Hz)
+Wave::Wave(unsigned char* data8, // Tableau de donees lorsque l'on est sur des donnees 8 bits
+           long int data_nb,     // Nombre de donnees
+           short channels_nb,    // Nombre de canaux (1 pour mono ou 2 pour stereo)
+           int sampling_freq) {  // Frequence d'echantillonnage (en Hertz)(classique en musique : 44100 Hz)
 
   int i;
 
-  // Vérifi que tout est correct pour la taille des types
+  // Verifi que tout est correct pour la taille des types
   checkTypesSize();
 
-  // Nombre de données
+  // Nombre de donnees
   (*this).data_nb = data_nb;
 
-  // Tableau de données lorsque l'on est sur des données 16 bits
+  // Tableau de donnees lorsque l'on est sur des donnees 16 bits
   (*this).data8 = new unsigned char[data_nb];
   for (i=0; i<data_nb; i++) { 
     (*this).data8[i] = data8[i]; //Recopie en profondeur
   }
-  is_data8_allocated  = true;  // Tableau alloué
-  is_data16_allocated = false; // Tableau non alloué
+  is_data8_allocated  = true;  // Tableau alloue
+  is_data16_allocated = false; // Tableau non alloue
   
   InitDescriptor(8, channels_nb, sampling_freq);
 }
 
-void Wave::InitDescriptor(int depth,           // Nombre de bits par donnée (8 ou 16)
-                          short channels_nb,   // Nombre de canaux (1 pour mono ou 2 pour stéréo)
-                          int sampling_freq) { // Fréquence d'échantillonnage (en Hertz)(classique en musique : 44100 Hz)
+void Wave::InitDescriptor(int depth,           // Nombre de bits par donnee (8 ou 16)
+                          short channels_nb,   // Nombre de canaux (1 pour mono ou 2 pour stereo)
+                          int sampling_freq) { // Frequence d'echantillonnage (en Hertz)(classique en musique : 44100 Hz)
            
-  // (2 octets) : Nombre de bits par donnée (8 ou 16)
+  // (2 octets) : Nombre de bits par donnee (8 ou 16)
   (*this).depth = depth;
 
   // (4 octets) : Constante "RIFF" i.e identification du format
@@ -77,19 +77,19 @@ void Wave::InitDescriptor(int depth,           // Nombre de bits par donnée (8 o
   // (4 octets) : Constante "data"
   data_id[0] = 'd'; data_id[1] = 'a'; data_id[2] = 't'; data_id[3] = 'a';          
 
-  // (4 octets) : file_size est le nombre d'octet restant à lire (i.e = taille du fichier moins 8 octets)
+  // (4 octets) : file_size est le nombre d'octet restant e lire (i.e = taille du fichier moins 8 octets)
   file_size = 44 + (depth/8) * data_nb - 8;
-  // (4 octets) : Nombre d'octets utilisés pour définir en détail le chunk
+  // (4 octets) : Nombre d'octets utilises pour definir en detail le chunk
   chunk_size = 16;
   // (2 octets) : Format de fichier (1: PCM,  ...)
   format = 1;
-  // (2 octets) : Nombre de canaux (1 pour mono ou 2 pour stéréo)
+  // (2 octets) : Nombre de canaux (1 pour mono ou 2 pour stereo)
   (*this).channels_nb = channels_nb;
-  // (4 octets) : Fréquence d'échantillonnage (en Hertz)
+  // (4 octets) : Frequence d'echantillonnage (en Hertz)
   (*this).sampling_freq = sampling_freq;
   // (4 octets) : Nombre d'octets par seconde de musique
   (*this).bytes_per_second = sampling_freq*channels_nb*depth/8;
-  // (2 octets) : Nombre d'octets par échantillon
+  // (2 octets) : Nombre d'octets par echantillon
   (*this).bytes_per_sample = channels_nb*depth/8;
   // (4 octets) : nombre d'octet restant (i.e = taille du fichier moins 44 octets)
   data_size = (depth/8) * data_nb;
@@ -102,30 +102,30 @@ Wave::~Wave() {
     delete[] data16;
 }
 
-void Wave::getData8(unsigned char** data, // Tableau de donées lorsque l'on est sur des données 8 bits
+void Wave::getData8(unsigned char** data, // Tableau de donees lorsque l'on est sur des donnees 8 bits
                     int* size) {          // Taille du tableau
    
   int i;            
-  if (!is_data8_allocated) { // Tableau non encore alloué
-    cout<<"Wave::getData8: Erreur, les donnée ne sont pas présente en 8 bits \n";
+  if (!is_data8_allocated) { // Tableau non encore alloue
+    cout<<"Wave::getData8: Erreur, les donnee ne sont pas presente en 8 bits \n";
     exit(-1);
   }
 
-  // Nombre de données
+  // Nombre de donnees
   (*size) = data_nb;
   
-  // Allocation du tableau de données 
+  // Allocation du tableau de donnees 
   (*data) = new unsigned char[data_nb];
   for (i=0; i<data_nb; i++) { 
     (*data)[i] = data8[i]; //Recopie en profondeur
   }
 }
 
-void Wave::modifData8(unsigned char* data) { // Tableau de donées lorsque l'on est sur des données 8 bits
+void Wave::modifData8(unsigned char* data) { // Tableau de donees lorsque l'on est sur des donnees 8 bits
    
   int i;            
-  if (!is_data8_allocated) { // Tableau non encore alloué
-    cout<<"Wave::setData8: Erreur, le tableau n'est pas alloué\n";
+  if (!is_data8_allocated) { // Tableau non encore alloue
+    cout<<"Wave::setData8: Erreur, le tableau n'est pas alloue\n";
     exit(-1);
   }
 
@@ -176,7 +176,7 @@ void Wave::read(char* fileName) {
     //Bit de poids faible en premier
     file_size +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
   }
-  cout<<"Wave::read: Le nombre d'octets restant à lire est : "<<file_size<<endl;
+  cout<<"Wave::read: Le nombre d'octets restant e lire est : "<<file_size<<endl;
   
   // file_id
   for (i=0; i<4; i++, pos++) {
@@ -201,7 +201,7 @@ void Wave::read(char* fileName) {
   }
 
   // chunk_size
-  chunk_size = 0; // Nombre d'octets utilisés pour définir en détail le chunk
+  chunk_size = 0; // Nombre d'octets utilises pour definir en detail le chunk
   for (i=0; i<4; i++, pos++) {
     //Bit de poids faible en premier
     chunk_size +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
@@ -217,7 +217,7 @@ void Wave::read(char* fileName) {
   cout<<"Wave::read: Le format est (1=PCM) : "<<format<<endl;
 
   // format
-  channels_nb = 0;     // Nombre de canaux (1 pour mono ou 2 pour stéréo)
+  channels_nb = 0;     // Nombre de canaux (1 pour mono ou 2 pour stereo)
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     channels_nb +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
@@ -225,12 +225,12 @@ void Wave::read(char* fileName) {
   cout<<"Wave::read: Le nombre de canaux est : "<<channels_nb<<endl;
 
   // sampling_freq
-  sampling_freq = 0;     // Fréquence d'échantillonnage (en Hertz)
+  sampling_freq = 0;     // Frequence d'echantillonnage (en Hertz)
   for (i=0; i<4; i++, pos++) {
     //Bit de poids faible en premier
     sampling_freq +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
   }
-  cout<<"Wave::read: La fréquence d'échantillonge est : "<<sampling_freq<<endl;
+  cout<<"Wave::read: La frequence d'echantillonge est : "<<sampling_freq<<endl;
 
   // bytes_per_second
   bytes_per_second = 0;     // Nombre d'octets par seconde de musique
@@ -241,30 +241,30 @@ void Wave::read(char* fileName) {
   cout<<"Wave::read: Le nombre d'octets par seconde est : "<<bytes_per_second<<endl;
 
   // bytes_per_sample
-  bytes_per_sample = 0;     // Nombre d'octets par échantillon
+  bytes_per_sample = 0;     // Nombre d'octets par echantillon
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     bytes_per_sample +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
   }
-  cout<<"Wave::read: Le nombre d'octets par échantillon est : "<<bytes_per_sample<<endl;
+  cout<<"Wave::read: Le nombre d'octets par echantillon est : "<<bytes_per_sample<<endl;
   if (bytes_per_sample != (bytes_per_second/sampling_freq)) {
     cout<<"Wave::read: bytes_per_sample != (bytes_per_second/sampling_freq)\n";
     exit(-1);
   }
 
   // depth
-  depth = 0;     // Nombre de bits par donnée (8 ou 16)
+  depth = 0;     // Nombre de bits par donnee (8 ou 16)
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     depth +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
   }
-  cout<<"Wave::read: Le nombre de bits par donnée est : "<<depth<<endl;
+  cout<<"Wave::read: Le nombre de bits par donnee est : "<<depth<<endl;
   if (depth != (8*bytes_per_sample/channels_nb)) {
     cout<<"Wave::read: depth != (8*bytes_per_sample/channels_nb)\n";
     exit(-1);
   }
 
-  //chunk données
+  //chunk donnees
   for (i=0; i<4; i++, pos++) {
     data_id[i] = header[pos]; // Constante "data"
     cout<<data_id[i];
@@ -281,7 +281,7 @@ void Wave::read(char* fileName) {
     //Bit de poids faible en premier
     data_size +=(int)pow(256, i)*(int)header[pos]; //little-endian : increasing numeric significance with increasing memory addresses
   }
-  cout<<"Wave::read: Le nombre d'octets restant à lire est : "<<data_size<<endl;
+  cout<<"Wave::read: Le nombre d'octets restant e lire est : "<<data_size<<endl;
   if (data_size != (file_size-36)) {
     cout<<"Wave::read: data_size != (file_size-36)\n";
     exit(-1);
@@ -297,8 +297,8 @@ void Wave::read(char* fileName) {
         cout<<"Wave::read: Erreur, impossible de lire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
         exit(-1);
       }
-      is_data8_allocated  = true;  // Tableau non alloué
-      is_data16_allocated = false; // Tableau alloué
+      is_data8_allocated  = true;  // Tableau non alloue
+      is_data16_allocated = false; // Tableau alloue
       break;
 
     case 16:
@@ -308,8 +308,8 @@ void Wave::read(char* fileName) {
         cout<<"Wave::read: Erreur, impossible de lire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
         exit(-1);
       }
-      is_data8_allocated  = false; // Tableau non alloué
-      is_data16_allocated = true;  // Tableau alloué
+      is_data8_allocated  = false; // Tableau non alloue
+      is_data16_allocated = true;  // Tableau alloue
       break;
 
     default:
@@ -364,7 +364,7 @@ void Wave::write(char* fileName) {
     exit(-1);    
   }
 
-  // chunk_size : nombre d'octets utilisés pour définir en détail le chunk
+  // chunk_size : nombre d'octets utilises pour definir en detail le chunk
   for (i=0; i<4; i++, pos++) {
     //Bit de poids faible en premier
     header[pos] = (( 255 << (8*i) ) & chunk_size)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
@@ -376,13 +376,13 @@ void Wave::write(char* fileName) {
     header[pos] = (( 255 << (8*i) ) & format)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
   }
 
-  // channels_nb : Nombre de canaux (1 pour mono ou 2 pour stéréo)
+  // channels_nb : Nombre de canaux (1 pour mono ou 2 pour stereo)
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     header[pos] = (( 255 << (8*i) ) & channels_nb)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
   }
 
-  // sampling_freq : fréquence d'échantillonge 
+  // sampling_freq : frequence d'echantillonge 
   for (i=0; i<4; i++, pos++) {
     //Bit de poids faible en premier
     header[pos] = (( 255 << (8*i) ) & sampling_freq)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
@@ -394,19 +394,19 @@ void Wave::write(char* fileName) {
     header[pos] = (( 255 << (8*i) ) & bytes_per_second)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
   }
 
-  // bytes_per_sample : nombre d'octets par échantillon
+  // bytes_per_sample : nombre d'octets par echantillon
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     header[pos] = (( 255 << (8*i) ) & bytes_per_sample)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
   }
 
-  // depth : nombre de bits par donnée (8 ou 16)
+  // depth : nombre de bits par donnee (8 ou 16)
   for (i=0; i<2; i++, pos++) {
     //Bit de poids faible en premier
     header[pos] = (( 255 << (8*i) ) & depth)>>(8*i); //little-endian : increasing numeric significance with increasing memory addresses
   }
 
-  //chunk données : constante "data"
+  //chunk donnees : constante "data"
   for (i=0; i<4; i++, pos++) {
     header[pos] = data_id[i]; // Constante "data"
   }
@@ -419,23 +419,23 @@ void Wave::write(char* fileName) {
 
   // ECRITURE DU HEADER
   if (fwrite (header, 1, 44, fd) != 44) { 
-    cout<<"Wave::write: Erreur, impossible d'écrire dans le fichier "<<fileName<<" le header\n";
+    cout<<"Wave::write: Erreur, impossible d'ecrire dans le fichier "<<fileName<<" le header\n";
     exit(-1);
   }
 
-  cout<<"Fin écriture du header\n";
+  cout<<"Fin ecriture du header\n";
   //LECTURE DES DONNEES
   switch (depth) {
     case 8:
       cout<<"fwrite (data8, \n";
       if (fwrite (data8, 1, data_nb, fd) != data_nb) { //Les donnees sont sur 8 bits
-        cout<<"Wave::write: Erreur, impossible d'écrire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
+        cout<<"Wave::write: Erreur, impossible d'ecrire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
         exit(-1);
       }
       break;
     case 16:
       if (fwrite (data16, 2, data_nb, fd) != data_nb) { //Les donnees sont sur 16 bits
-        cout<<"Wave::write: Erreur, impossible d'écrire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
+        cout<<"Wave::write: Erreur, impossible d'ecrire dans le fichier "<<fileName<<" le bon nombre d'octet\n";
         exit(-1);
       }
       break;
@@ -444,7 +444,7 @@ void Wave::write(char* fileName) {
       exit(-1);    
   }
 
-  cout<<"Fin écriture des datas\n";
+  cout<<"Fin ecriture des datas\n";
 
   //FERMETURE DU FICHIER
   fclose(fd);      
@@ -505,7 +505,7 @@ void Wave::write(char* fileName) {
 //    //Bit de poids faible en premier
 //    file_size +=(int)pow(256, i)*(int)str_tmp[i]; //little-endian : increasing numeric significance with increasing memory addresses
 //  }
-//  cout<<"Wave::read: Le nombre d'octets restant à lire est : "<<file_size<<endl;
+//  cout<<"Wave::read: Le nombre d'octets restant e lire est : "<<file_size<<endl;
 //  
 //  for (i=0; i<4; i++) {
 //    ifs>>file_id[i];         // Identifiant "WAVE"
@@ -527,7 +527,7 @@ void Wave::write(char* fileName) {
 //  }
 //
 //  // chunk_size
-//  chunk_size = 0; // Nombre d'octets utilisés pour définir en détail le chunk
+//  chunk_size = 0; // Nombre d'octets utilises pour definir en detail le chunk
 //  for (i=0; i<4; i++) {
 //    ifs>>str_tmp[i];
 //    cout<<(int)str_tmp[i]<<endl;
@@ -546,18 +546,18 @@ void Wave::write(char* fileName) {
 //  cout<<"Wave::read: Le format est (1=PCM) : "<<format<<endl;
 //
 //
-////  ifs>>channels_nb;          // Nombre de canaux (1 pour mono ou 2 pour stéréo)
+////  ifs>>channels_nb;          // Nombre de canaux (1 pour mono ou 2 pour stereo)
 ////  cout<<"Wave::read: Le nombre de canaux est : "<<channels_nb<<endl;
-////  ifs>>sampling_freq;        // Fréquence d'échantillonnage (en Hertz)
-////  cout<<"Wave::read: La fréquence d'échantillonge est : "<<sampling_freq<<endl;
+////  ifs>>sampling_freq;        // Frequence d'echantillonnage (en Hertz)
+////  cout<<"Wave::read: La frequence d'echantillonge est : "<<sampling_freq<<endl;
 ////  ifs>>bytes_per_second;     // Nombre d'octets par seconde de musique
 ////  cout<<"Wave::read: Le nombre d'octets par seconde est : "<<bytes_per_second<<endl;
-////  ifs>>bytes_per_sample;     // Nombre d'octets par échantillon
-////  cout<<"Wave::read: Le nombre d'octets par échantillon est : "<<bytes_per_sample<<endl;
-////  ifs>>depth;                // Nombre de bits par donnée (8 ou 16)
-////  cout<<"Wave::read: Le nombre de bits par donnée est : "<<depth<<endl;
+////  ifs>>bytes_per_sample;     // Nombre d'octets par echantillon
+////  cout<<"Wave::read: Le nombre d'octets par echantillon est : "<<bytes_per_sample<<endl;
+////  ifs>>depth;                // Nombre de bits par donnee (8 ou 16)
+////  cout<<"Wave::read: Le nombre de bits par donnee est : "<<depth<<endl;
 ////*/
-////  //chunk données
+////  //chunk donnees
 ////  for (i=0; i<4; i++) {
 ////    ifs>>data_id[i];       // Constante "data"
 ////    cout<<data_id[i];
@@ -625,8 +625,8 @@ void Wave::write(char* fileName) {
 //    file_type[i] = (char) fgetc(fd);
 //    fscanf(fd, "%c", str_tmp[i]);
 //  }
-//  file_size = atoi(str_tmp);  // Nombre d'octet restant à lire (i.e = taille du fichier moins 8 octets)
-//  cout<<"Wave::read: nombre d'octet restant à lire = "<<file_size<<endl;
+//  file_size = atoi(str_tmp);  // Nombre d'octet restant e lire (i.e = taille du fichier moins 8 octets)
+//  cout<<"Wave::read: nombre d'octet restant e lire = "<<file_size<<endl;
 //  for (i=0; i<4; i++) {
 //    fscanf(fd, "%c", file_id[i]);// Identifiant "WAVE"
 //    cout<<file_id[i];
@@ -649,21 +649,21 @@ void Wave::write(char* fileName) {
 ////  /*TEST*/  ifs>>c;
 ////  /*TEST*/}
 ////
-/////*  ifs>>chunk_size;           // Nombre d'octets utilisés pour définir en détail le chunk
+/////*  ifs>>chunk_size;           // Nombre d'octets utilises pour definir en detail le chunk
 ////  ifs>>format;               // Format de fichier (1: PCM,  ...)
 ////  cout<<"Wave::read: Le format est (1=PCM) : "<<format<<endl;
-////  ifs>>channels_nb;          // Nombre de canaux (1 pour mono ou 2 pour stéréo)
+////  ifs>>channels_nb;          // Nombre de canaux (1 pour mono ou 2 pour stereo)
 ////  cout<<"Wave::read: Le nombre de canaux est : "<<channels_nb<<endl;
-////  ifs>>sampling_freq;        // Fréquence d'échantillonnage (en Hertz)
-////  cout<<"Wave::read: La fréquence d'échantillonge est : "<<sampling_freq<<endl;
+////  ifs>>sampling_freq;        // Frequence d'echantillonnage (en Hertz)
+////  cout<<"Wave::read: La frequence d'echantillonge est : "<<sampling_freq<<endl;
 ////  ifs>>bytes_per_second;     // Nombre d'octets par seconde de musique
 ////  cout<<"Wave::read: Le nombre d'octets par seconde est : "<<bytes_per_second<<endl;
-////  ifs>>bytes_per_sample;     // Nombre d'octets par échantillon
-////  cout<<"Wave::read: Le nombre d'octets par échantillon est : "<<bytes_per_sample<<endl;
-////  ifs>>depth;                // Nombre de bits par donnée (8 ou 16)
-////  cout<<"Wave::read: Le nombre de bits par donnée est : "<<depth<<endl;
+////  ifs>>bytes_per_sample;     // Nombre d'octets par echantillon
+////  cout<<"Wave::read: Le nombre d'octets par echantillon est : "<<bytes_per_sample<<endl;
+////  ifs>>depth;                // Nombre de bits par donnee (8 ou 16)
+////  cout<<"Wave::read: Le nombre de bits par donnee est : "<<depth<<endl;
 ////*/
-////  //chunk données
+////  //chunk donnees
 ////  for (i=0; i<4; i++) {
 ////    ifs>>data_id[i];       // Constante "data"
 ////    cout<<data_id[i];
@@ -719,3 +719,5 @@ void Wave::checkTypesSize() {
     exit(-1);
   }
 }
+
+
